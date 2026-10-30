@@ -35,9 +35,28 @@ jobs:
           chmod +x gradlew
           set -o pipefail
           ./gradlew build 2>&1 | tee build.log || {
-            echo "::error title=Build::$(grep -E 'error:|What went wrong|Could not|> ' build.log | head -60 | sed ':a;N;$!ba;s/\n/%0A/g')"
+            echo "::error title=Build::$(grep -E 'error:|What went wrong|Could not' build.log | head -80 | sed ':a;N;$!ba;s/\n/%0A/g')"
             exit 1
           }
+
+      - name: Diagnose
+        if: failure()
+        run: |
+          MCJAR=$(find ~/.gradle/caches .gradle -name 'minecraft-*client*.jar' -o -name 'minecraft-merged*.jar' 2>/dev/null | grep -v sources | head -1)
+          [ -z "$MCJAR" ] && MCJAR=$(find ~/.gradle/caches .gradle -name '*.jar' -path '*minecraft*' 2>/dev/null | grep -v sources | xargs ls -S | head -1)
+          FAPI=$(find ~/.gradle/caches -name 'fabric-rendering-v1*.jar' | grep -v sources | head -1)
+          FSCR=$(find ~/.gradle/caches -name 'fabric-screen-api-v1*.jar' | grep -v sources | head -1)
+          {
+            echo "MCJAR=$MCJAR"
+            unzip -l "$MCJAR" | grep -oE 'net/minecraft/client/gui/[A-Za-z]+\.class' | sort -u | tr '\n' ' '
+            echo
+            javap -cp "$FAPI" net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement
+          } > diag1.txt
+          echo "::notice title=Diag1::$(sed ':a;N;$!ba;s/\n/%0A/g' diag1.txt)"
+          G=$(unzip -l "$MCJAR" | grep -oE 'net/minecraft/client/gui/Gui[A-Za-z]*\.class' | grep -v '^net/minecraft/client/gui/Gui.class' | head -3 | sed 's/\.class//; s#/#.#g')
+          for c in $G; do javap -cp "$MCJAR" $c | grep -E 'public|class' | head -70 > d.txt; echo "::notice title=$c::$(sed ':a;N;$!ba;s/\n/%0A/g' d.txt)"; done
+          javap -cp "$MCJAR" net.minecraft.client.gui.screens.Screen | grep -E 'render|extract|init|class' > d.txt; echo "::notice title=Screen::$(sed ':a;N;$!ba;s/\n/%0A/g' d.txt)"
+          javap -cp "$FSCR" net.fabricmc.fabric.api.client.screen.v1.Screens > d.txt; echo "::notice title=Screens::$(sed ':a;N;$!ba;s/\n/%0A/g' d.txt)"
 
       - uses: actions/upload-artifact@v4
         with:

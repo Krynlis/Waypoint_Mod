@@ -94,8 +94,12 @@ public final class WaypointStore {
     public static String currentDimension() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return "minecraft:overworld";
+        return dimensionId(mc.level.dimension());
+    }
+
+    public static String dimensionId(Object dimensionKey) {
         // ResourceKey#toString: "ResourceKey[minecraft:dimension / minecraft:overworld]"
-        String s = String.valueOf(mc.level.dimension());
+        String s = String.valueOf(dimensionKey);
         int slash = s.lastIndexOf(" / ");
         if (slash >= 0) {
             s = s.substring(slash + 3);

@@ -115,7 +115,7 @@ public class WaypointListScreen extends Screen {
             g.fill(rowLeft, y, rowLeft + 400, y + ROW_HEIGHT - 2, 0x60000000);
             g.fill(rowLeft + 2, y + 2, rowLeft + 20, y + 20, argb);
             g.fill(rowLeft + 3, y + 3, rowLeft + 19, y + 19, 0xFF101010);
-            wp.getIcon().draw(g, rowLeft + 3, y + 3, 2, argb);
+            wp.getIcon().draw(g, rowLeft + 3, y + 3, 16, wp.color, 0xFF);
 
             g.text(font, displayName(wp), rowLeft + 26, y + 3, wp.visible ? argb : 0xFF707070, true);
 

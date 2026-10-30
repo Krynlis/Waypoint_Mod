@@ -1,8 +1,11 @@
 package de.kryn.waypoints;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import de.kryn.waypoints.data.Settings;
+import de.kryn.waypoints.data.WaypointIcon;
 import de.kryn.waypoints.data.WaypointStore;
 import de.kryn.waypoints.gui.WaypointEditScreen;
+import de.kryn.waypoints.gui.SettingsScreen;
 import de.kryn.waypoints.gui.WaypointListScreen;
 import de.kryn.waypoints.render.WaypointHud;
 import net.fabricmc.api.ClientModInitializer;
@@ -30,6 +33,8 @@ public class KrynsWaypoints implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        WaypointIcon.load();
+        Settings.load();
         WaypointStore.load();
 
         createKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
@@ -43,12 +48,16 @@ public class KrynsWaypoints implements ClientModInitializer {
             }
         });
 
-        // Button "Waypointliste" oben rechts im Escape-Menü
+        // Buttons "Optionen" und "Waypointliste" oben rechts im Escape-Menü
         ScreenEvents.AFTER_INIT.register((mc, screen, width, height) -> {
             if (screen instanceof PauseScreen) {
                 Screens.getWidgets(screen).add(Button.builder(Component.literal("Waypointliste"),
                                 b -> mc.gui.setScreen(new WaypointListScreen(screen)))
                         .bounds(width - 105, 5, 100, 20)
+                        .build());
+                Screens.getWidgets(screen).add(Button.builder(Component.literal("Optionen"),
+                                b -> mc.gui.setScreen(new SettingsScreen(screen)))
+                        .bounds(width - 180, 5, 70, 20)
                         .build());
             }
         });

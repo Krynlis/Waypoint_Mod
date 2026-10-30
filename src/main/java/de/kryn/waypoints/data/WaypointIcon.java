@@ -1,224 +1,121 @@
 package de.kryn.waypoints.data;
 
+import de.kryn.waypoints.KrynsWaypoints;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
- * Symbole als 8x8-Pixelgrafik. '.' ist transparent, 'C' wird in der Farbe des Wegpunkts gezeichnet.
+ * Symbole als 32x32-Pixelgrafik, geladen aus assets/kryns_waypoints/icons.txt.
+ * '.' ist transparent, '|' wird in der Farbe des Wegpunkts gezeichnet.
  */
-public enum WaypointIcon {
-    HOUSE("Zuhause",
-            "...rr...",
-            "..rrrr..",
-            ".rrrrrr.",
-            "rrrrrrrr",
-            ".wwwwww.",
-            ".wbwwdw.",
-            ".wwwwdw.",
-            ".wwwwdw."),
-    BED("Bett",
-            "........",
-            "........",
-            "W.......",
-            "WWWrrrrr",
-            "WWWrrrrr",
-            "pppppppp",
-            "p......p",
-            "........"),
-    ANIMAL("Tiere",
-            "P......P",
-            "PPPPPPPP",
-            "PWkPPkWP",
-            "PPPPPPPP",
-            "PPSSSSPP",
-            "PPdSSdPP",
-            "PPSSSSPP",
-            "PPPPPPPP"),
-    HEART("Herz",
-            "........",
-            ".rr..rr.",
-            "rWrrrrrr",
-            "rrrrrrrr",
-            ".rrrrrr.",
-            "..rrrr..",
-            "...rr...",
-            "........"),
-    FRIEND_1("Freund 1",
-            "hhhhhhhh",
-            "hhhhhhhh",
-            "hsssssss",
-            "ssssssss",
-            "sWessWes",
-            "sssnnsss",
-            "ssmssmss",
-            "ssmmmmss"),
-    FRIEND_2("Freund 2",
-            "yyyyyyyy",
-            "yyyyyyyy",
-            "yttttttt",
-            "tttttttt",
-            "tWgttWgt",
-            "tttnnttt",
-            "ttmttmtt",
-            "ttmmmmtt"),
-    FRIEND_3("Freund 3",
-            "kkkkkkkk",
-            "kkkkkkkk",
-            "kDDDDDDk",
-            "DDDDDDDD",
-            "DWrDDWrD",
-            "DDDnnDDD",
-            "DDmDDmDD",
-            "DDmmmmDD"),
-    STAR("Stern",
-            "...yy...",
-            "...yy...",
-            "yyyyyyyy",
-            ".yyyyyy.",
-            "..yyyy..",
-            ".yyyyyy.",
-            ".yy..yy.",
-            "yy....yy"),
-    FLAG("Ziel",
-            "gCCCCC..",
-            "gCCCCCC.",
-            "gCCCCC..",
-            "gCCCC...",
-            "g.......",
-            "g.......",
-            "g.......",
-            "g......."),
-    CHEST("Lager",
-            "oooooooo",
-            "obbbbbbo",
-            "obbbbbbo",
-            "oooGGooo",
-            "obbGGbbo",
-            "obbbbbbo",
-            "obbbbbbo",
-            "oooooooo"),
-    MINE("Mine",
-            "..cccc..",
-            ".c....c.",
-            "c..pp..c",
-            "...pp...",
-            "...pp...",
-            "...pp...",
-            "...pp...",
-            "...pp..."),
-    DIAMOND("Erze",
-            "........",
-            "..cccc..",
-            ".cWcccc.",
-            "cccccccc",
-            ".cccccc.",
-            "..cccc..",
-            "...cc...",
-            "........"),
-    DANGER("Gefahr",
-            ".......W",
-            "......Wg",
-            ".....Wg.",
-            "....Wg..",
-            ".y.Wg...",
-            "..yg....",
-            "..py....",
-            ".p..y..."),
-    DEATH("Todespunkt",
-            ".WWWWWW.",
-            "WWWWWWWW",
-            "WkkWWkkW",
-            "WkkWWkkW",
-            "WWWWWWWW",
-            ".WWkkWW.",
-            ".WkWWkW.",
-            "..WWWW.."),
-    PORTAL("Portal",
-            "oooooooo",
-            "ovvvvvvo",
-            "ovVvvvvo",
-            "ovvvVvvo",
-            "ovvvvvvo",
-            "ovVvvvvo",
-            "ovvvvVvo",
-            "oooooooo"),
-    TREE("Baum / Farm",
-            "..eeee..",
-            ".eeeeee.",
-            "eeEeeeee",
-            "eeeeeEee",
-            ".eeeeee.",
-            "...pp...",
-            "...pp...",
-            "...pp...");
+public final class WaypointIcon {
+    public static final int SIZE = 32;
+    private static final int WAYPOINT_COLOR = -1;
 
-    private static final Map<Character, Integer> PALETTE = Map.ofEntries(
-            Map.entry('r', 0xFFC0392B), // rot
-            Map.entry('w', 0xFFC8A165), // Holzwand
-            Map.entry('W', 0xFFF2F2F2), // weiß
-            Map.entry('b', 0xFF8B5A2B), // Truhe/Holz
-            Map.entry('d', 0xFF5C3A1E), // Tür / Nasenloch
-            Map.entry('p', 0xFF7A5230), // Stiel / Planke
-            Map.entry('P', 0xFFF0A0A8), // Schwein rosa
-            Map.entry('S', 0xFFE07A8A), // Schnauze
-            Map.entry('k', 0xFF1E1E1E), // schwarz
-            Map.entry('h', 0xFF4A2F1B), // braune Haare
-            Map.entry('y', 0xFFF4D03F), // gelb / blond
-            Map.entry('s', 0xFFE0AC7E), // Haut hell
-            Map.entry('t', 0xFFD49A6A), // Haut mittel
-            Map.entry('D', 0xFF8D5524), // Haut dunkel
-            Map.entry('e', 0xFF3D9B35), // Blätter
-            Map.entry('E', 0xFF2C7326), // Blätter dunkel
-            Map.entry('n', 0xFF9E6B4A), // Nase
-            Map.entry('m', 0xFF6B3A2A), // Mund
-            Map.entry('g', 0xFFA8A8A8), // grau / Eisen
-            Map.entry('G', 0xFF8C8C8C), // Schloss
-            Map.entry('o', 0xFF2B1F3A), // Obsidian / Umrandung
-            Map.entry('v', 0xFF8E44AD), // Portal lila
-            Map.entry('V', 0xFFC39BD3), // Portal hell
-            Map.entry('c', 0xFF4FD1D9)  // Diamant
-    );
+    /** Alte Symbolnamen (Version 1.0) auf die neuen IDs abbilden. */
+    private static final Map<String, String> LEGACY = Map.ofEntries(
+            Map.entry("HOUSE", "house"), Map.entry("BED", "bed"), Map.entry("ANIMAL", "pig"),
+            Map.entry("HEART", "heart"), Map.entry("FRIENDS", "friends"), Map.entry("FRIEND_1", "friends"),
+            Map.entry("FRIEND_2", "friends"), Map.entry("FRIEND_3", "friends"), Map.entry("STAR", "star"),
+            Map.entry("FLAG", "flag"), Map.entry("CHEST", "chest"), Map.entry("MINE", "pickaxe"),
+            Map.entry("DIAMOND", "diamond"), Map.entry("DANGER", "sword"), Map.entry("DEATH", "skull"),
+            Map.entry("PORTAL", "netherportal"), Map.entry("TREE", "tree"), Map.entry("BELL", "bell"),
+            Map.entry("WHEAT", "wheat"));
 
+    private static final Map<String, WaypointIcon> BY_ID = new LinkedHashMap<>();
+    private static List<WaypointIcon> all = List.of();
+
+    public final String id;
     public final String label;
-    private final String[] rows;
+    /** Je Zeile zusammengefasste Pixel: x0, x1 (exklusiv), y, Farbe. */
+    private final int[] runs;
 
-    WaypointIcon(String label, String... rows) {
+    private WaypointIcon(String id, String label, int[] runs) {
+        this.id = id;
         this.label = label;
-        this.rows = rows;
+        this.runs = runs;
     }
 
-    // Augenfarben der Freunde: blau, grün und rot über 'e'/'g'/'r' wären doppelt belegt,
-    // daher werden die Pupillen hier je nach Symbol eingefärbt.
-    private int colorFor(char c, int waypointColor) {
-        if (c == 'C') return waypointColor;
-        if (c == 'e' && this == FRIEND_1) return 0xFF3B6FD8;
-        if (c == 'g' && this == FRIEND_2) return 0xFF2E9E44;
-        Integer argb = PALETTE.get(c);
-        return argb == null ? 0 : argb;
+    public static List<WaypointIcon> all() {
+        return all;
     }
 
-    /** Zeichnet das Symbol mit linker oberer Ecke (x, y); jeder Pixel ist scale x scale groß. */
-    public void draw(GuiGraphicsExtractor g, int x, int y, int scale, int waypointColor) {
-        for (int row = 0; row < 8; row++) {
-            String line = rows[row];
-            for (int col = 0; col < 8; col++) {
-                char c = line.charAt(col);
-                if (c == '.') continue;
-                int argb = colorFor(c, waypointColor);
-                if (argb == 0) continue;
-                int px = x + col * scale;
-                int py = y + row * scale;
-                g.fill(px, py, px + scale, py + scale, argb);
-            }
+    public static WaypointIcon byId(String id) {
+        if (id != null && LEGACY.containsKey(id)) id = LEGACY.get(id);
+        WaypointIcon icon = BY_ID.get(id);
+        if (icon != null) return icon;
+        icon = BY_ID.get("flag");
+        return icon != null ? icon : all.get(0);
+    }
+
+    public static WaypointIcon defaultIcon() {
+        return byId("house");
+    }
+
+    /**
+     * Zeichnet das Symbol mit linker oberer Ecke (x, y) in der Größe size x size.
+     * waypointRgb ist die Wegpunktfarbe (ohne Alpha), alpha 0-255 die Deckkraft.
+     */
+    public void draw(GuiGraphicsExtractor g, int x, int y, float size, int waypointRgb, int alpha) {
+        int a = (alpha & 0xFF) << 24;
+        g.pose().pushMatrix();
+        g.pose().translate(x, y);
+        g.pose().scale(size / SIZE);
+        for (int i = 0; i < runs.length; i += 4) {
+            int rgb = runs[i + 3] == WAYPOINT_COLOR ? waypointRgb : runs[i + 3];
+            g.fill(runs[i], runs[i + 2], runs[i + 1], runs[i + 2] + 1, a | (rgb & 0xFFFFFF));
         }
+        g.pose().popMatrix();
     }
 
-    public static WaypointIcon byName(String name) {
-        try {
-            return valueOf(name);
+    public static void load() {
+        try (InputStream in = WaypointIcon.class.getResourceAsStream("/assets/kryns_waypoints/icons.txt")) {
+            if (in == null) throw new IllegalStateException("icons.txt fehlt");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+            Map<Character, Integer> palette = new HashMap<>();
+            palette.put('|', WAYPOINT_COLOR);
+            List<WaypointIcon> icons = new ArrayList<>();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("color ")) {
+                    String[] parts = line.split(" ");
+                    palette.put(parts[1].charAt(0), Integer.parseInt(parts[2], 16));
+                } else if (line.startsWith("icon ")) {
+                    String[] parts = line.split(" ", 3);
+                    List<Integer> runs = new ArrayList<>();
+                    for (int y = 0; y < SIZE; y++) {
+                        String row = reader.readLine();
+                        int x = 0;
+                        while (x < SIZE) {
+                            char c = row.charAt(x);
+                            int end = x + 1;
+                            while (end < SIZE && row.charAt(end) == c) end++;
+                            if (c != '.') {
+                                runs.add(x);
+                                runs.add(end);
+                                runs.add(y);
+                                runs.add(palette.getOrDefault(c, 0xFF00FF));
+                            }
+                            x = end;
+                        }
+                    }
+                    icons.add(new WaypointIcon(parts[1], parts[2], runs.stream().mapToInt(Integer::intValue).toArray()));
+                }
+            }
+            for (WaypointIcon icon : icons) BY_ID.put(icon.id, icon);
+            all = Collections.unmodifiableList(icons);
         } catch (Exception e) {
-            return FLAG;
+            KrynsWaypoints.LOGGER.error("Konnte Symbole nicht laden", e);
         }
     }
 }

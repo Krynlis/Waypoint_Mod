@@ -7,13 +7,13 @@ public class Waypoint {
     public int z;
     /** Dimension-ID, z.B. "minecraft:overworld". */
     public String dimension = "minecraft:overworld";
-    public String icon = WaypointIcon.HOUSE.name();
+    public String icon = "house";
     /** RGB ohne Alpha. */
     public int color = 0xFFFFFF;
     public boolean visible = true;
 
     public WaypointIcon getIcon() {
-        return WaypointIcon.byName(icon);
+        return WaypointIcon.byId(icon);
     }
 
     public int argb() {

@@ -17,9 +17,10 @@ import java.util.List;
 
 /** Wegpunkt erstellen (existing == null) oder bearbeiten. */
 public class WaypointEditScreen extends Screen {
-    private static final int ICON_CELL = 22;
-    private static final int ICON_COLS = 4;
-    private static final int COLOR_CELL = 11;
+    private static final int ICON_CELL = 18;
+    private static final int ICON_COLS = 12;
+    private static final int COLOR_CELL = 13;
+    private static final int LEFT = 166;
 
     private final Screen parent;
     private final Waypoint existing;
@@ -59,7 +60,7 @@ public class WaypointEditScreen extends Screen {
             xText = String.valueOf(pos[0]);
             yText = String.valueOf(pos[1]);
             zText = String.valueOf(pos[2]);
-            icon = WaypointIcon.HOUSE;
+            icon = WaypointIcon.defaultIcon();
             color = ColorPalette.COLORS[ColorPalette.SIZE * 4 + 5];
         }
     }
@@ -77,7 +78,7 @@ public class WaypointEditScreen extends Screen {
         colorButtons.clear();
 
         int cx = width / 2;
-        top = Math.max(4, height / 2 - 112);
+        top = Math.max(4, height / 2 - 116);
 
         nameBox = new EditBox(font, cx - 100, top + 26, 200, 18, Component.literal("Name"));
         nameBox.setMaxLength(32);
@@ -92,19 +93,19 @@ public class WaypointEditScreen extends Screen {
                 .bounds(cx + 56, top + 58, 94, 18).build());
 
         int pickTop = top + 96;
-        WaypointIcon[] icons = WaypointIcon.values();
-        for (int i = 0; i < icons.length; i++) {
-            WaypointIcon value = icons[i];
-            int bx = cx - 150 + (i % ICON_COLS) * ICON_CELL;
+        List<WaypointIcon> icons = WaypointIcon.all();
+        for (int i = 0; i < icons.size(); i++) {
+            WaypointIcon value = icons.get(i);
+            int bx = cx - LEFT + (i % ICON_COLS) * ICON_CELL;
             int by = pickTop + (i / ICON_COLS) * ICON_CELL;
             Button button = Button.builder(Component.empty(), b -> icon = value)
-                    .bounds(bx, by, ICON_CELL - 2, ICON_CELL - 2)
+                    .bounds(bx, by, ICON_CELL, ICON_CELL)
                     .tooltip(Tooltip.create(Component.literal(value.label)))
                     .build();
             iconButtons.add(addRenderableWidget(button));
         }
 
-        int colorLeft = cx + 150 - ColorPalette.SIZE * COLOR_CELL;
+        int colorLeft = cx + LEFT - ColorPalette.SIZE * COLOR_CELL;
         for (int i = 0; i < ColorPalette.COLORS.length; i++) {
             int value = ColorPalette.COLORS[i];
             int bx = colorLeft + (i % ColorPalette.SIZE) * COLOR_CELL;
@@ -113,7 +114,8 @@ public class WaypointEditScreen extends Screen {
                     .bounds(bx, by, COLOR_CELL, COLOR_CELL).build()));
         }
 
-        int buttonsY = pickTop + 4 * ICON_CELL + 10;
+        int iconRows = (icons.size() + ICON_COLS - 1) / ICON_COLS;
+        int buttonsY = pickTop + Math.max(iconRows * ICON_CELL, ColorPalette.SIZE * COLOR_CELL) + 8;
         addRenderableWidget(Button.builder(Component.literal("Speichern"), b -> save())
                 .bounds(cx - 152, buttonsY, 150, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Abbrechen"), b -> onClose())
@@ -152,7 +154,7 @@ public class WaypointEditScreen extends Screen {
         wp.x = parse(xBox.getValue(), player != null ? player.getBlockX() : 0);
         wp.y = parse(yBox.getValue(), player != null ? player.getBlockY() : 0);
         wp.z = parse(zBox.getValue(), player != null ? player.getBlockZ() : 0);
-        wp.icon = icon.name();
+        wp.icon = icon.id;
         wp.color = color;
         if (existing == null) {
             wp.dimension = WaypointStore.currentDimension();
@@ -181,21 +183,21 @@ public class WaypointEditScreen extends Screen {
         int px = cx + 108, py = top + 23;
         g.fill(px - 2, py - 2, px + 26, py + 26, argb);
         g.fill(px - 1, py - 1, px + 25, py + 25, 0xFF101010);
-        icon.draw(g, px + 4, py + 4, 2, argb);
+        icon.draw(g, px + 4, py + 4, 16, color, 0xFF);
 
         g.text(font, "Koordinaten", cx - 150, top + 48, 0xFFA0A0A0, false);
         g.text(font, "X", cx - 147, top + 63, 0xFFFFFFFF, false);
         g.text(font, "Y", cx - 79, top + 63, 0xFFFFFFFF, false);
         g.text(font, "Z", cx - 11, top + 63, 0xFFFFFFFF, false);
 
-        g.text(font, "Symbol", cx - 150, top + 86, 0xFFA0A0A0, false);
-        g.text(font, "Farbe", cx + 150 - ColorPalette.SIZE * COLOR_CELL, top + 86, 0xFFA0A0A0, false);
+        g.text(font, "Symbol", cx - LEFT, top + 86, 0xFFA0A0A0, false);
+        g.text(font, "Farbe", cx + LEFT - ColorPalette.SIZE * COLOR_CELL, top + 86, 0xFFA0A0A0, false);
 
-        WaypointIcon[] icons = WaypointIcon.values();
+        List<WaypointIcon> icons = WaypointIcon.all();
         for (int i = 0; i < iconButtons.size(); i++) {
             Button b = iconButtons.get(i);
-            if (icons[i] == icon) outline(g, b.getX() - 1, b.getY() - 1, b.getWidth() + 2, b.getHeight() + 2, 0xFFFFFFFF);
-            icons[i].draw(g, b.getX() + 2, b.getY() + 2, 2, argb);
+            icons.get(i).draw(g, b.getX() + 1, b.getY() + 1, 16, color, 0xFF);
+            if (icons.get(i) == icon) outline(g, b.getX(), b.getY(), b.getWidth(), b.getHeight(), 0xFFFFFFFF);
         }
 
         for (int i = 0; i < colorButtons.size(); i++) {

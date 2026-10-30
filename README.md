@@ -2,9 +2,10 @@
 
 Rein clientseitige Fabric-Mod für Wegpunkte (Minecraft 26.3+).
 
-- **B** (änderbar unter Steuerung): Wegpunkt an der aktuellen Position erstellen – Name, Koordinaten, 16 Symbole und 8x8-Farbwahl
+- **B** (änderbar unter Steuerung): Wegpunkt an der aktuellen Position erstellen – Name, Koordinaten, 64 Symbole und 8x8-Farbwahl
+- **Escape-Menü → „Optionen“**: Wechselentfernung zur XP-Leiste (50–2000), Markergröße, 50% Transparenz
 - **Escape-Menü → „Waypointliste“** (oben rechts): Wegpunkte bearbeiten, ein-/ausblenden, löschen
-- Bis 300 Blöcke: Symbol + Name + Entfernung in der Welt (durch Wände sichtbar), weiter weg: Symbol auf der XP-Leiste in Blickrichtung
+- Bis zur eingestellten Entfernung (Standard 300): Symbol + Name + Entfernung in der Welt (durch Wände sichtbar), weiter weg: Symbol auf der XP-Leiste in Blickrichtung
 - Gespeichert pro Welt/Server und Dimension in `config/kryns_waypoints.json`
 
 ## Bauen

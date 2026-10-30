@@ -87,7 +87,7 @@ public class WaypointEditScreen extends Screen {
 
         int pickTop = top + 96;
         IconGrid iconGrid = addRenderableWidget(new IconGrid(cx - LEFT, pickTop, ICON_COLS, ICON_CELL,
-                () -> icon, value -> icon = value, () -> color));
+                () -> icon, this::selectIcon, () -> color));
         addRenderableWidget(new ColorGrid(cx + LEFT - ColorPalette.SIZE * COLOR_CELL, pickTop, COLOR_CELL,
                 () -> color, value -> color = value));
 
@@ -98,6 +98,15 @@ public class WaypointEditScreen extends Screen {
                 .bounds(cx + 2, buttonsY, 150, 20).build());
 
         setInitialFocus(nameBox);
+    }
+
+    /** Übernimmt den Symbolnamen als Wegpunktnamen, solange kein eigener Name eingetragen ist. */
+    private void selectIcon(WaypointIcon value) {
+        String current = nameBox.getValue().trim();
+        if (current.isEmpty() || current.equals(icon.label)) {
+            nameBox.setValue(value.label);
+        }
+        icon = value;
     }
 
     private EditBox coordBox(int x, String value, String label) {

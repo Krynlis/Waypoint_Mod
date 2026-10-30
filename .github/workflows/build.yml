@@ -56,11 +56,9 @@ jobs:
           G=$(unzip -l "$MCJAR" | grep -oE 'net/minecraft/client/gui/Gui[A-Za-z]*\.class' | grep -v '^net/minecraft/client/gui/Gui.class' | head -3 | sed 's/\.class//; s#/#.#g')
           for c in NONE; do javap -cp "$MCJAR" $c | grep -E 'public|class' | head -70 > d.txt; echo "::notice title=$c::$(sed ':a;N;$!ba;s/\n/%0A/g' d.txt)"; done
           {
-            javap -cp "$MCJAR" com.mojang.blaze3d.platform.InputConstants | grep -E 'KEY_B|UNKNOWN|class'
-            javap -cp "$MCJAR" net.minecraft.client.KeyMapping | grep -E 'KeyMapping\(|consumeClick|class'
-            javap -protected -cp "$MCJAR" net.minecraft.client.gui.screens.Screen | grep -iE 'minecraft|font|width'
-            FKEY=$(find ~/.gradle/caches -name 'fabric-key*.jar' | grep -v sources | head -1); echo "FKEY=$FKEY"
-            unzip -l "$FKEY" | grep -oE 'net/fabricmc/[A-Za-z0-9/]+\.class'
+            javap -cp "$MCJAR" net.minecraft.client.Minecraft | grep -iE 'screen|gui|class'
+            javap -cp "$MCJAR" net.minecraft.client.gui.components.EditBox | grep -iE 'filter|Predicate|setValue|Hint|MaxLength|EditBox\('
+            javap -cp "$MCJAR" net.minecraft.client.gui.screens.ConfirmScreen | grep -E 'ConfirmScreen\('
           } > d.txt; echo "::notice title=Diag2::$(sed ':a;N;$!ba;s/\n/%0A/g' d.txt)"
           javap -cp "$FSCR" net.fabricmc.fabric.api.client.screen.v1.Screens > d.txt; echo "::notice title=Screens::$(sed ':a;N;$!ba;s/\n/%0A/g' d.txt)"
 

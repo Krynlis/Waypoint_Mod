@@ -16,7 +16,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +34,9 @@ public class KrynsWaypoints implements ClientModInitializer {
         WaypointStore.load();
 
         createKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.kryns_waypoints.create", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, CATEGORY));
+                "key.kryns_waypoints.create", InputConstants.Type.KEYSYM, InputConstants.KEY_B, CATEGORY));
         listKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.kryns_waypoints.list", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY));
+                "key.kryns_waypoints.list", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), CATEGORY));
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             while (createKey.consumeClick()) {

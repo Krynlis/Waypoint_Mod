@@ -79,9 +79,9 @@ public final class WaypointHud {
         int top = sy - iconSize / 2;
         g.fill(left - 2, top - 2, left + iconSize + 2, top + iconSize + 2, withAlpha(wp.color, alpha));
         g.fill(left - 1, top - 1, left + iconSize + 1, top + iconSize + 1, withAlpha(0x101010, alpha * 3 / 4));
-        wp.getIcon().draw(g, left, top, iconSize, wp.color, alpha);
+        wp.drawIcon(g, left, top, iconSize, alpha);
 
-        String name = wp.name.isEmpty() ? wp.getIcon().label : wp.name;
+        String name = wp.displayName();
         int nameWidth = font.width(name);
         int nameY = top - 14;
         g.fill(sx - nameWidth / 2 - 2, nameY - 2, sx + nameWidth / 2 + 2, nameY + 9, withAlpha(0, alpha / 2));
@@ -104,7 +104,7 @@ public final class WaypointHud {
 
         g.fill(left - 1, top - 1, left + 9, top + 9, behind ? withAlpha(0, alpha * 3 / 8) : withAlpha(wp.color, alpha));
         g.fill(left, top, left + 8, top + 8, withAlpha(0x101010, alpha * 3 / 4));
-        wp.getIcon().draw(g, left, top, 8, wp.color, alpha);
+        wp.drawIcon(g, left, top, 8, alpha);
     }
 
     private static int withAlpha(int rgb, int alpha) {

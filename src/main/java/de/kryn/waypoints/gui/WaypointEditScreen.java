@@ -1,25 +1,35 @@
 package de.kryn.waypoints.gui;
 
+import de.kryn.waypoints.data.IconChoice;
+import de.kryn.waypoints.data.IconLibrary;
 import de.kryn.waypoints.data.Waypoint;
 import de.kryn.waypoints.data.WaypointIcon;
 import de.kryn.waypoints.data.WaypointStore;
+import de.kryn.waypoints.head.PlayerHeads;
+import de.kryn.waypoints.ui.KButton;
+import de.kryn.waypoints.ui.KScreen;
+import de.kryn.waypoints.ui.Theme;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.Component;
 
-
-/** Wegpunkt erstellen (existing == null) oder bearbeiten. */
-public class WaypointEditScreen extends Screen {
-    private static final int ICON_CELL = 18;
+/**
+ * Wegpunkt erstellen (existing == null) oder bearbeiten.
+ * Ist der Name ein Minecraft-Spielername, wird dessen Kopf automatisch gesucht und als Vorschau angezeigt;
+ * über "Hinzufügen" landet er in der Symbolliste. Auf Servern gibt es zusätzlich die Köpfe der Spieler online.
+ */
+public class WaypointEditScreen extends KScreen {
+    private static final int ICON_CELL = 20;
     private static final int ICON_COLS = 12;
+    private static final int ICON_ROWS = 6;
     private static final int COLOR_CELL = 13;
-    private static final int LEFT = 166;
+    private static final int LEFT = 178;
+    private static final int PANEL_HEIGHT = 266;
+    /** Wartezeit nach dem letzten Tastendruck, bevor ein Spielerkopf gesucht wird. */
+    private static final long LOOKUP_DELAY_MS = 300;
 
-    private final Screen parent;
     private final Waypoint existing;
 
     private EditBox nameBox;
@@ -31,14 +41,21 @@ public class WaypointEditScreen extends Screen {
     private String xText;
     private String yText;
     private String zText;
-    private WaypointIcon icon;
+    private IconChoice choice;
+    private IconChoice lastBuiltinChoice;
     private int color;
+
+    /** Kopf zum aktuell eingetippten Namen (Vorschau), noch nicht in der Liste. */
+    private IconChoice previewHead;
+    private KButton addHeadButton;
+    private String lastText;
+    private long changedAt;
+    private boolean showOnlinePlayers;
 
     private int top;
 
     public WaypointEditScreen(Screen parent, Waypoint existing) {
-        super(Component.literal(existing == null ? "Neuer Wegpunkt" : "Wegpunkt bearbeiten"));
-        this.parent = parent;
+        super(existing == null ? "Neuer Wegpunkt" : "Wegpunkt bearbeiten", parent);
         this.existing = existing;
 
         if (existing != null) {
@@ -46,22 +63,26 @@ public class WaypointEditScreen extends Screen {
             xText = String.valueOf(existing.x);
             yText = String.valueOf(existing.y);
             zText = String.valueOf(existing.z);
-            icon = existing.getIcon();
             color = existing.color;
+            lastBuiltinChoice = IconChoice.of(existing.getIcon());
+            choice = existing.hasFace() && existing.playerHead != null
+                    ? IconChoice.head(existing.playerHead, existing.face)
+                    : lastBuiltinChoice;
         } else {
             name = "";
             LocalPlayer player = Minecraft.getInstance().player;
-            int[] pos = player == null ? new int[3] : new int[]{player.getBlockX(), player.getBlockY(), player.getBlockZ()};
-            xText = String.valueOf(pos[0]);
-            yText = String.valueOf(pos[1]);
-            zText = String.valueOf(pos[2]);
-            icon = WaypointIcon.defaultIcon();
+            xText = String.valueOf(player == null ? 0 : player.getBlockX());
+            yText = String.valueOf(player == null ? 0 : player.getBlockY());
+            zText = String.valueOf(player == null ? 0 : player.getBlockZ());
             color = ColorPalette.COLORS[ColorPalette.SIZE * 4 + 5];
+            lastBuiltinChoice = IconChoice.of(WaypointIcon.defaultIcon());
+            choice = lastBuiltinChoice;
         }
+        lastText = "";
     }
 
     @Override
-    protected void init() {
+    protected void layout() {
         // Eingaben über rebuildWidgets() (z.B. Fenstergröße) hinweg behalten
         if (nameBox != null) {
             name = nameBox.getValue();
@@ -71,49 +92,105 @@ public class WaypointEditScreen extends Screen {
         }
 
         int cx = width / 2;
-        top = Math.max(4, height / 2 - 116);
+        top = Math.max(2, (height - PANEL_HEIGHT) / 2);
+        setPanel(cx - LEFT - 8, top, 2 * LEFT + 16, PANEL_HEIGHT);
+        int left = cx - LEFT;
 
-        nameBox = new EditBox(font, cx - 100, top + 26, 200, 18, Component.literal("Name"));
-        nameBox.setMaxLength(32);
-        nameBox.setValue(name);
-        nameBox.setHint(Component.literal("Name des Wegpunkts"));
-        addRenderableWidget(nameBox);
+        nameBox = field(left, top + 36, 180, 18, name, 32, "Name oder Spielername");
+        addHeadButton = addRenderableWidget(new KButton(left + 184, top + 56, 66, 14, "Hinzufügen", this::addPreviewHead));
+        updateAddButton();
 
-        xBox = coordBox(cx - 150, xText, "X");
-        yBox = coordBox(cx - 82, yText, "Y");
-        zBox = coordBox(cx - 14, zText, "Z");
-        addRenderableWidget(Button.builder(Component.literal("Aktuelle Pos."), b -> useCurrentPosition())
-                .bounds(cx + 56, top + 58, 94, 18).build());
+        xBox = coordField(left + 10, xText);
+        yBox = coordField(left + 92, yText);
+        zBox = coordField(left + 174, zText);
+        addRenderableWidget(new KButton(left + 256, top + 82, 100, 18, "Aktuelle Pos.", this::useCurrentPosition));
 
-        int pickTop = top + 96;
-        IconGrid iconGrid = addRenderableWidget(new IconGrid(cx - LEFT, pickTop, ICON_COLS, ICON_CELL,
-                () -> icon, this::selectIcon, () -> color));
+        int pickTop = top + 114;
+        IconGrid iconGrid = addRenderableWidget(new IconGrid(left, pickTop, ICON_COLS, ICON_ROWS, ICON_CELL,
+                IconLibrary::choices, () -> choice.key(), this::selectChoice, this::removeHead, () -> color));
+        PlayerHeadGrid playerGrid = addRenderableWidget(new PlayerHeadGrid(left, pickTop, ICON_COLS, ICON_ROWS, ICON_CELL,
+                PlayerHeadGrid::onlinePlayers, () -> choice.key(), this::selectChoice, this::addHead));
+        boolean onServer = Minecraft.getInstance().getSingleplayerServer() == null;
+        if (!onServer) showOnlinePlayers = false;
+        iconGrid.visible = !showOnlinePlayers;
+        playerGrid.visible = showOnlinePlayers;
+        KButton iconsTab = addRenderableWidget(new KButton(left, top + 100, 70, 12, "Symbole", () -> {
+            showOnlinePlayers = false;
+            rebuildWidgets();
+        }));
+        iconsTab.selected = !showOnlinePlayers;
+        if (onServer) {
+            KButton playersTab = addRenderableWidget(new KButton(left + 72, top + 100, 90, 12, "Spieler online", () -> {
+                showOnlinePlayers = true;
+                rebuildWidgets();
+            }));
+            playersTab.selected = showOnlinePlayers;
+        }
         addRenderableWidget(new ColorGrid(cx + LEFT - ColorPalette.SIZE * COLOR_CELL, pickTop, COLOR_CELL,
                 () -> color, value -> color = value));
 
-        int buttonsY = pickTop + Math.max(iconGrid.getHeight(), ColorPalette.SIZE * COLOR_CELL) + 8;
-        addRenderableWidget(Button.builder(Component.literal("Speichern"), b -> save())
-                .bounds(cx - 152, buttonsY, 150, 20).build());
-        addRenderableWidget(Button.builder(Component.literal("Abbrechen"), b -> onClose())
-                .bounds(cx + 2, buttonsY, 150, 20).build());
+        int buttonsY = top + PANEL_HEIGHT - 26;
+        addRenderableWidget(new KButton(cx - 152, buttonsY, 150, 20, "Speichern", this::save));
+        addRenderableWidget(new KButton(cx + 2, buttonsY, 150, 20, "Abbrechen", this::onClose));
 
         setInitialFocus(nameBox);
     }
 
-    /** Übernimmt den Symbolnamen als Wegpunktnamen, solange kein eigener Name eingetragen ist. */
-    private void selectIcon(WaypointIcon value) {
-        String current = nameBox.getValue().trim();
-        if (current.isEmpty() || current.equals(icon.label)) {
-            nameBox.setValue(value.label);
-        }
-        icon = value;
+    private EditBox coordField(int x, String value) {
+        return field(x, top + 82, 70, 18, value, 9, "");
     }
 
-    private EditBox coordBox(int x, String value, String label) {
-        EditBox box = new EditBox(font, x + 12, top + 58, 52, 18, Component.literal(label));
-        box.setMaxLength(9);
-        box.setValue(value);
-        return addRenderableWidget(box);
+    private void selectChoice(IconChoice value) {
+        String current = nameBox.getValue().trim();
+        if (current.isEmpty() || current.equals(choice.label())) {
+            nameBox.setValue(value.label());
+            lastText = value.label();
+        }
+        choice = value;
+        if (!value.isHead()) lastBuiltinChoice = value;
+    }
+
+    private void removeHead(IconChoice head) {
+        IconLibrary.removeHead(head.label());
+        if (choice.key().equals(head.key())) choice = lastBuiltinChoice;
+        updateAddButton();
+    }
+
+    private void addHead(IconChoice head) {
+        IconLibrary.addHead(head.label(), head.face());
+        updateAddButton();
+    }
+
+    private void addPreviewHead() {
+        if (previewHead == null) return;
+        IconLibrary.addHead(previewHead.label(), previewHead.face());
+        selectChoice(previewHead);
+        updateAddButton();
+    }
+
+    private void updateAddButton() {
+        if (addHeadButton == null) return;
+        boolean known = previewHead != null && IconLibrary.findHead(previewHead.label()) != null;
+        addHeadButton.active = previewHead != null && !(known && choice.key().equals(previewHead.key()));
+        addHeadButton.setLabel(known ? "Auswählen" : "Hinzufügen");
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        String text = nameBox.getValue().trim();
+        long now = System.currentTimeMillis();
+        if (!text.equals(lastText)) {
+            lastText = text;
+            changedAt = now;
+            previewHead = null;
+        }
+        if (previewHead == null && now - changedAt >= LOOKUP_DELAY_MS && PlayerHeads.isValidName(text)) {
+            IconChoice saved = IconLibrary.findHead(text);
+            int[] face = saved != null ? saved.face() : PlayerHeads.request(text);
+            if (face != null) previewHead = saved != null ? saved : IconChoice.head(text, face);
+        }
+        updateAddButton();
     }
 
     private void useCurrentPosition() {
@@ -126,7 +203,7 @@ public class WaypointEditScreen extends Screen {
 
     private static int parse(String text, int fallback) {
         try {
-            return Integer.parseInt(text);
+            return Integer.parseInt(text.trim());
         } catch (NumberFormatException e) {
             return fallback;
         }
@@ -139,8 +216,16 @@ public class WaypointEditScreen extends Screen {
         wp.x = parse(xBox.getValue(), player != null ? player.getBlockX() : 0);
         wp.y = parse(yBox.getValue(), player != null ? player.getBlockY() : 0);
         wp.z = parse(zBox.getValue(), player != null ? player.getBlockZ() : 0);
-        wp.icon = icon.id;
         wp.color = color;
+        if (choice.isHead()) {
+            wp.playerHead = choice.label();
+            wp.face = choice.face();
+            wp.icon = lastBuiltinChoice.key();
+        } else {
+            wp.playerHead = null;
+            wp.face = null;
+            wp.icon = choice.key();
+        }
         if (existing == null) {
             wp.dimension = WaypointStore.currentDimension();
             WaypointStore.add(wp);
@@ -151,31 +236,43 @@ public class WaypointEditScreen extends Screen {
     }
 
     @Override
-    public void onClose() {
-        Minecraft.getInstance().gui.setScreen(parent);
-    }
-
-    @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
         super.extractRenderState(g, mouseX, mouseY, delta);
         int cx = width / 2;
-        int argb = 0xFF000000 | color;
+        int left = cx - LEFT;
 
-        g.centeredText(font, title, cx, top + 6, 0xFFFFFFFF);
-        g.text(font, "Name", cx - 100, top + 16, 0xFFA0A0A0, false);
+        g.text(font, "Name", left, top + 26, Theme.MUTED, false);
 
-        // Vorschau neben dem Namen
-        int px = cx + 108, py = top + 23;
-        g.fill(px - 2, py - 2, px + 26, py + 26, argb);
-        g.fill(px - 1, py - 1, px + 25, py + 25, 0xFF101010);
-        icon.draw(g, px + 4, py + 4, 16, color, 0xFF);
+        // Spielerkopf-Vorschau neben dem Namen, darunter "Hinzufügen"
+        String text = nameBox.getValue().trim();
+        int hx = left + 203, hy = top + 24;
+        Theme.box(g, hx, hy, 28, 28, Theme.FIELD, previewHead != null ? Theme.ACCENT : Theme.PANEL_BORDER);
+        if (previewHead != null) {
+            previewHead.draw(g, hx + 2, hy + 2, 24, color, 0xFF);
+        } else {
+            g.centeredText(font, PlayerHeads.isLoading(text) ? "…" : "?", hx + 14, hy + 10, Theme.DISABLED_TEXT);
+        }
+        String status = "";
+        if (previewHead != null) status = "Spielerkopf gefunden";
+        else if (PlayerHeads.isLoading(text)
+                || (PlayerHeads.isValidName(text) && System.currentTimeMillis() - changedAt < LOOKUP_DELAY_MS)) {
+            status = "Suche Spielerkopf …";
+        }
+        g.text(font, status, left, top + 58, previewHead != null ? Theme.ACCENT : Theme.MUTED, false);
 
-        g.text(font, "Koordinaten", cx - 150, top + 48, 0xFFA0A0A0, false);
-        g.text(font, "X", cx - 147, top + 63, 0xFFFFFFFF, false);
-        g.text(font, "Y", cx - 79, top + 63, 0xFFFFFFFF, false);
-        g.text(font, "Z", cx - 11, top + 63, 0xFFFFFFFF, false);
+        // Vorschau rechts neben dem Namen
+        int size = 32;
+        int px = cx + LEFT - size - 8, py = top + 28;
+        Theme.box(g, px - 4, py - 4, size + 8, size + 8, Theme.FIELD, 0xFF000000 | color);
+        choice.draw(g, px, py, size, color, 0xFF);
 
-        g.text(font, "Symbol", cx - LEFT, top + 86, 0xFFA0A0A0, false);
-        g.text(font, "Farbe", cx + LEFT - ColorPalette.SIZE * COLOR_CELL, top + 86, 0xFFA0A0A0, false);
+        g.text(font, "Koordinaten", left, top + 72, Theme.MUTED, false);
+        g.text(font, "X", left, top + 87, Theme.TEXT, false);
+        g.text(font, "Y", left + 82, top + 87, Theme.TEXT, false);
+        g.text(font, "Z", left + 164, top + 87, Theme.TEXT, false);
+
+        g.text(font, showOnlinePlayers ? "+ = hinzufügen" : "☆ = Favorit",
+                left + 168, top + 102, Theme.MUTED, false);
+        g.text(font, "Farbe", cx + LEFT - ColorPalette.SIZE * COLOR_CELL, top + 104, Theme.MUTED, false);
     }
 }

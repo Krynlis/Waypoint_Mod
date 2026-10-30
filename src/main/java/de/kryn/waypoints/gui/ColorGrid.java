@@ -1,5 +1,6 @@
 package de.kryn.waypoints.gui;
 
+import de.kryn.waypoints.ui.Theme;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -31,7 +32,7 @@ public class ColorGrid extends AbstractWidget {
 
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
-        g.fill(getX() - 1, getY() - 1, getX() + width + 1, getY() + height + 1, 0xFF000000);
+        Theme.box(g, getX() - 1, getY() - 1, width + 2, height + 2, 0xFF000000, Theme.PANEL_BORDER);
         int hovered = isHovered() ? indexAt(mouseX, mouseY) : -1;
         int selectedIndex = -1;
         for (int i = 0; i < ColorPalette.COLORS.length; i++) {
@@ -47,7 +48,7 @@ public class ColorGrid extends AbstractWidget {
             int cx = getX() + (selectedIndex % ColorPalette.SIZE) * cell;
             int cy = getY() + (selectedIndex / ColorPalette.SIZE) * cell;
             g.outline(cx - 1, cy - 1, cell + 2, cell + 2, 0xFF000000);
-            g.outline(cx, cy, cell, cell, 0xFFFFFFFF);
+            g.outline(cx, cy, cell, cell, Theme.TEXT);
         }
     }
 

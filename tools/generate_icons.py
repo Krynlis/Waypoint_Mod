@@ -56,6 +56,14 @@ def down(im):
 
 @icon("house","Zuhause")
 def _(d): P(d,[(3,15),(16,3),(28,15)],RED); R(d,6,15,25,28,WOOD); R(d,9,18,14,23,BLUE); R(d,18,19,22,28,DDWOOD)
+@icon("spawn","Spawn")
+def _(d):
+    E(d,3,24,28,30,GRAY); E(d,6,25,25,29,LGRAY)
+    E(d,11,2,20,11,C)
+    E(d,8,12,23,21,C); P(d,[(8,16),(23,16),(20,26),(11,26)],C)
+    for a in (-1,1):
+        L(d,[(16+a*8,6),(16+a*11,3)],YEL,2)
+        L(d,[(16+a*9,13),(16+a*13,13)],YEL,2)
 @icon("bed","Bett")
 def _(d): R(d,3,9,6,27,DWOOD); R(d,25,16,28,27,DWOOD); R(d,6,18,25,23,WOOD); R(d,7,14,12,18,WHITE); R(d,13,13,27,18,RED)
 @icon("pig","Tiere")
@@ -233,33 +241,27 @@ def outline(im):
     return out
 ICONS=[(i,l,outline(im)) for i,l,im in ICONS]
 print(len(ICONS))
-S=4; cols=8
-sheet=Image.new("RGB",(cols*36*S,((len(ICONS)+cols-1)//cols)*36*S),(45,45,45))
+import os, sys
+COLS=8
+ROWS=(len(ICONS)+COLS-1)//COLS
+out_dir=sys.argv[1] if len(sys.argv)>1 else "."
+base=Image.new("RGBA",(COLS*N,ROWS*N),(0,0,0,0))
+tint=Image.new("RGBA",(COLS*N,ROWS*N),(0,0,0,0))
+preview=Image.new("RGBA",(COLS*N,ROWS*N),(45,45,45,255))
+lines=[f"atlas {COLS*N} {ROWS*N}"]
 for k,(i,l,im) in enumerate(ICONS):
-    show=im.copy(); p=show.load()
+    ox,oy=(k%COLS)*N,(k//COLS)*N
+    p=im.load(); hast=False
     for y in range(N):
-        for x in range(N):
-            if p[x,y][:3]==C and p[x,y][3]: p[x,y]=(60,150,255,255)
-    big=show.resize((N*S,N*S),Image.NEAREST)
-    sheet.paste(big,((k%cols)*36*S+2*S,(k//cols)*36*S+2*S),big)
-sheet.save("sheet.png")
-# Datei für die Mod
-chars=[c for c in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&*+-/:;<=>?@^_~"]
-pal={}
-lines=[]
-for i,l,im in ICONS:
-    p=im.load()
-    lines.append(f"icon {i} {l}")
-    for y in range(N):
-        row=""
         for x in range(N):
             r,g,b,a=p[x,y]
-            if not a: row+="."; continue
-            key="C" if (r,g,b)==C else "%06X"%((r<<16)|(g<<8)|b)
-            if key=="C": row+="|"; continue
-            if key not in pal: pal[key]=chars[len(pal)]
-            row+=pal[key]
-        lines.append(row)
-head=[f"color {c} {k}" for k,c in pal.items()]
-open("icons.txt","w").write("# Kryn's Waypoints Icons (32x32). '.' = transparent, '|' = Wegpunktfarbe\n"+"\n".join(head+lines)+"\n")
-print("farben",len(pal))
+            if not a: continue
+            if (r,g,b)==C:
+                tint.putpixel((ox+x,oy+y),(255,255,255,255)); preview.putpixel((ox+x,oy+y),(60,150,255,255)); hast=True
+            else:
+                base.putpixel((ox+x,oy+y),(r,g,b,255)); preview.putpixel((ox+x,oy+y),(r,g,b,255))
+    lines.append(f"icon {i} {'1' if hast else '0'} {l}")
+tex=os.path.join(out_dir,"textures","gui"); os.makedirs(tex,exist_ok=True)
+base.save(os.path.join(tex,"icons.png")); tint.save(os.path.join(tex,"icons_tint.png"))
+open(os.path.join(out_dir,"icons.txt"),"w").write("\n".join(lines)+"\n")
+preview.resize((COLS*N*4,ROWS*N*4),Image.NEAREST).save("sheet.png")

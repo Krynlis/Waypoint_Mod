@@ -7,13 +7,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /** Wegpunkt erstellen (existing == null) oder bearbeiten. */
 public class WaypointEditScreen extends Screen {
@@ -37,8 +34,6 @@ public class WaypointEditScreen extends Screen {
     private WaypointIcon icon;
     private int color;
 
-    private final List<Button> iconButtons = new ArrayList<>();
-    private final List<Button> colorButtons = new ArrayList<>();
     private int top;
 
     public WaypointEditScreen(Screen parent, Waypoint existing) {
@@ -74,8 +69,6 @@ public class WaypointEditScreen extends Screen {
             yText = yBox.getValue();
             zText = zBox.getValue();
         }
-        iconButtons.clear();
-        colorButtons.clear();
 
         int cx = width / 2;
         top = Math.max(4, height / 2 - 116);
@@ -93,29 +86,12 @@ public class WaypointEditScreen extends Screen {
                 .bounds(cx + 56, top + 58, 94, 18).build());
 
         int pickTop = top + 96;
-        List<WaypointIcon> icons = WaypointIcon.all();
-        for (int i = 0; i < icons.size(); i++) {
-            WaypointIcon value = icons.get(i);
-            int bx = cx - LEFT + (i % ICON_COLS) * ICON_CELL;
-            int by = pickTop + (i / ICON_COLS) * ICON_CELL;
-            Button button = Button.builder(Component.empty(), b -> icon = value)
-                    .bounds(bx, by, ICON_CELL, ICON_CELL)
-                    .tooltip(Tooltip.create(Component.literal(value.label)))
-                    .build();
-            iconButtons.add(addRenderableWidget(button));
-        }
+        IconGrid iconGrid = addRenderableWidget(new IconGrid(cx - LEFT, pickTop, ICON_COLS, ICON_CELL,
+                () -> icon, value -> icon = value, () -> color));
+        addRenderableWidget(new ColorGrid(cx + LEFT - ColorPalette.SIZE * COLOR_CELL, pickTop, COLOR_CELL,
+                () -> color, value -> color = value));
 
-        int colorLeft = cx + LEFT - ColorPalette.SIZE * COLOR_CELL;
-        for (int i = 0; i < ColorPalette.COLORS.length; i++) {
-            int value = ColorPalette.COLORS[i];
-            int bx = colorLeft + (i % ColorPalette.SIZE) * COLOR_CELL;
-            int by = pickTop + (i / ColorPalette.SIZE) * COLOR_CELL;
-            colorButtons.add(addRenderableWidget(Button.builder(Component.empty(), b -> color = value)
-                    .bounds(bx, by, COLOR_CELL, COLOR_CELL).build()));
-        }
-
-        int iconRows = (icons.size() + ICON_COLS - 1) / ICON_COLS;
-        int buttonsY = pickTop + Math.max(iconRows * ICON_CELL, ColorPalette.SIZE * COLOR_CELL) + 8;
+        int buttonsY = pickTop + Math.max(iconGrid.getHeight(), ColorPalette.SIZE * COLOR_CELL) + 8;
         addRenderableWidget(Button.builder(Component.literal("Speichern"), b -> save())
                 .bounds(cx - 152, buttonsY, 150, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Abbrechen"), b -> onClose())
@@ -192,29 +168,5 @@ public class WaypointEditScreen extends Screen {
 
         g.text(font, "Symbol", cx - LEFT, top + 86, 0xFFA0A0A0, false);
         g.text(font, "Farbe", cx + LEFT - ColorPalette.SIZE * COLOR_CELL, top + 86, 0xFFA0A0A0, false);
-
-        List<WaypointIcon> icons = WaypointIcon.all();
-        for (int i = 0; i < iconButtons.size(); i++) {
-            Button b = iconButtons.get(i);
-            icons.get(i).draw(g, b.getX() + 1, b.getY() + 1, 16, color, 0xFF);
-            if (icons.get(i) == icon) outline(g, b.getX(), b.getY(), b.getWidth(), b.getHeight(), 0xFFFFFFFF);
-        }
-
-        for (int i = 0; i < colorButtons.size(); i++) {
-            Button b = colorButtons.get(i);
-            int value = ColorPalette.COLORS[i];
-            g.fill(b.getX(), b.getY(), b.getX() + b.getWidth(), b.getY() + b.getHeight(), 0xFF000000);
-            g.fill(b.getX() + 1, b.getY() + 1, b.getX() + b.getWidth() - 1, b.getY() + b.getHeight() - 1, 0xFF000000 | value);
-            if (value == color) {
-                outline(g, b.getX() - 1, b.getY() - 1, b.getWidth() + 2, b.getHeight() + 2, 0xFFFFFFFF);
-            }
-        }
-    }
-
-    static void outline(GuiGraphicsExtractor g, int x, int y, int w, int h, int argb) {
-        g.fill(x, y, x + w, y + 1, argb);
-        g.fill(x, y + h - 1, x + w, y + h, argb);
-        g.fill(x, y, x + 1, y + h, argb);
-        g.fill(x + w - 1, y, x + w, y + h, argb);
     }
 }

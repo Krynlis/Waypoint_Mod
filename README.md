@@ -2,7 +2,7 @@
 
 Rein clientseitige Fabric-Mod für Wegpunkte (Minecraft 26.3+).
 
-- **B** (änderbar unter Steuerung): Wegpunkt an der aktuellen Position erstellen – Name, Koordinaten, 64 Symbole und 8x8-Farbwahl
+- **B** (änderbar unter Steuerung): Wegpunkt an der aktuellen Position erstellen – Name, Koordinaten, 65 Symbole und 8x8-Farbwahl
 - **Escape-Menü → „Optionen“**: Wechselentfernung zur XP-Leiste (50–2000), Markergröße, 50% Transparenz
 - **Escape-Menü → „Waypointliste“** (oben rechts): Wegpunkte bearbeiten, ein-/ausblenden, löschen
 - Bis zur eingestellten Entfernung (Standard 300): Symbol + Name + Entfernung in der Welt (durch Wände sichtbar), weiter weg: Symbol auf der XP-Leiste in Blickrichtung
@@ -22,4 +22,4 @@ Jeder Push auf `main` baut die Mod und legt die Jar im Release `v<mod_version>` 
 
 ## Symbole
 
-Die Symbole werden mit `tools/generate_icons.py` (Python + Pillow) erzeugt: `python3 tools/generate_icons.py` schreibt `icons.txt` (nach `src/main/resources/assets/kryns_waypoints/` kopieren) und eine Vorschau `sheet.png`.
+Die Symbole werden mit `tools/generate_icons.py` (Python + Pillow) erzeugt: `python3 tools/generate_icons.py src/main/resources/assets/kryns_waypoints` schreibt den Textur-Atlas und `icons.txt`, dazu eine Vorschau `sheet.png`.

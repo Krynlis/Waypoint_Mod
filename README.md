@@ -19,3 +19,7 @@ Die fertige Jar liegt in `build/libs/`. Alternativ baut GitHub Actions bei jedem
 ## Release
 
 Jeder Push auf `main` baut die Mod und legt die Jar im Release `v<mod_version>` ab (Version in `gradle.properties`). Für ein neues Release `mod_version` erhöhen.
+
+## Symbole
+
+Die Symbole werden mit `tools/generate_icons.py` (Python + Pillow) erzeugt: `python3 tools/generate_icons.py` schreibt `icons.txt` (nach `src/main/resources/assets/kryns_waypoints/` kopieren) und eine Vorschau `sheet.png`.

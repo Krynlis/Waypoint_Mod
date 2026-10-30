@@ -5,3 +5,5 @@ run/
 .idea/
 *.iml
 .vscode/
+/sheet.png
+/icons.txt

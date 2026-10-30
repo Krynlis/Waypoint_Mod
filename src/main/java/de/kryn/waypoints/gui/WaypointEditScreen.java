@@ -3,6 +3,7 @@ package de.kryn.waypoints.gui;
 import de.kryn.waypoints.data.Waypoint;
 import de.kryn.waypoints.data.WaypointIcon;
 import de.kryn.waypoints.data.WaypointStore;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -53,7 +54,7 @@ public class WaypointEditScreen extends Screen {
             color = existing.color;
         } else {
             name = "";
-            LocalPlayer player = net.minecraft.client.Minecraft.getInstance().player;
+            LocalPlayer player = Minecraft.getInstance().player;
             int[] pos = player == null ? new int[3] : new int[]{player.getBlockX(), player.getBlockY(), player.getBlockZ()};
             xText = String.valueOf(pos[0]);
             yText = String.valueOf(pos[1]);
@@ -130,7 +131,7 @@ public class WaypointEditScreen extends Screen {
     }
 
     private void useCurrentPosition() {
-        LocalPlayer player = minecraft.player;
+        LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
         xBox.setValue(String.valueOf(player.getBlockX()));
         yBox.setValue(String.valueOf(player.getBlockY()));
@@ -146,7 +147,7 @@ public class WaypointEditScreen extends Screen {
     }
 
     private void save() {
-        LocalPlayer player = minecraft.player;
+        LocalPlayer player = Minecraft.getInstance().player;
         Waypoint wp = existing != null ? existing : new Waypoint();
         wp.name = nameBox.getValue().trim();
         wp.x = parse(xBox.getValue(), player != null ? player.getBlockX() : 0);
@@ -165,7 +166,7 @@ public class WaypointEditScreen extends Screen {
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parent);
+        Minecraft.getInstance().setScreen(parent);
     }
 
     @Override

@@ -2,6 +2,7 @@ package de.kryn.waypoints.gui;
 
 import de.kryn.waypoints.data.Waypoint;
 import de.kryn.waypoints.data.WaypointStore;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -48,7 +49,7 @@ public class WaypointListScreen extends Screen {
             int bx = rowLeft + 400;
             addRenderableWidget(Button.builder(Component.literal("Löschen"), b -> confirmDelete(wp))
                     .bounds(bx - 50, y + 1, 50, 20).build());
-            addRenderableWidget(Button.builder(Component.literal("Bearbeiten"), b -> minecraft.setScreen(new WaypointEditScreen(this, wp)))
+            addRenderableWidget(Button.builder(Component.literal("Bearbeiten"), b -> Minecraft.getInstance().setScreen(new WaypointEditScreen(this, wp)))
                     .bounds(bx - 116, y + 1, 64, 20).build());
             addRenderableWidget(Button.builder(Component.literal(wp.visible ? "An" : "Aus"), b -> {
                         wp.visible = !wp.visible;
@@ -70,16 +71,16 @@ public class WaypointListScreen extends Screen {
         }).bounds(width / 2 - 146, bottom, 20, 20).build());
         next.active = page < pageCount() - 1;
 
-        addRenderableWidget(Button.builder(Component.literal("Neuer Wegpunkt"), b -> minecraft.setScreen(new WaypointEditScreen(this, null)))
+        addRenderableWidget(Button.builder(Component.literal("Neuer Wegpunkt"), b -> Minecraft.getInstance().setScreen(new WaypointEditScreen(this, null)))
                 .bounds(width / 2 - 100, bottom, 130, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Fertig"), b -> onClose())
                 .bounds(width / 2 + 40, bottom, 130, 20).build());
     }
 
     private void confirmDelete(Waypoint wp) {
-        minecraft.setScreen(new ConfirmScreen(confirmed -> {
+        Minecraft.getInstance().setScreen(new ConfirmScreen(confirmed -> {
             if (confirmed) WaypointStore.remove(wp);
-            minecraft.setScreen(this);
+            Minecraft.getInstance().setScreen(this);
         }, Component.literal("Wegpunkt löschen?"), Component.literal("\"" + displayName(wp) + "\" wird endgültig gelöscht.")));
     }
 
@@ -89,7 +90,7 @@ public class WaypointListScreen extends Screen {
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parent);
+        Minecraft.getInstance().setScreen(parent);
     }
 
     @Override
@@ -103,7 +104,7 @@ public class WaypointListScreen extends Screen {
             return;
         }
 
-        LocalPlayer player = minecraft.player;
+        LocalPlayer player = Minecraft.getInstance().player;
         String currentDim = WaypointStore.currentDimension();
         int start = page * rowsPerPage;
         for (int i = start; i < Math.min(list.size(), start + rowsPerPage); i++) {

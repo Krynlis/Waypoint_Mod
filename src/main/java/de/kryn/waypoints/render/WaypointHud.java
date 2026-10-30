@@ -23,7 +23,7 @@ public final class WaypointHud {
     public static void render(GuiGraphicsExtractor g, DeltaTracker deltaTracker) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (player == null || mc.level == null || mc.options.hideGui) return;
+        if (player == null || mc.level == null) return;
 
         float partialTick = deltaTracker.getGameTimeDeltaPartialTick(true);
         Vec3 eye = player.getEyePosition(partialTick);

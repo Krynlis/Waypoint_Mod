@@ -21,18 +21,23 @@ jobs:
       - name: Versionen anzeigen
         run: |
           MC=$(grep '^minecraft_version=' gradle.properties | cut -d= -f2)
-          echo "Minecraft aus gradle.properties: $MC"
-          echo "--- Neueste Minecraft-Versionen bei Fabric:"
-          curl -s https://meta.fabricmc.net/v2/versions/game | jq -r '.[0:8][] | "\(.version) stable=\(.stable)"'
-          echo "--- Neuester Loader:"
-          curl -s https://meta.fabricmc.net/v2/versions/loader | jq -r '.[0].version'
-          echo "--- Fabric API für $MC:"
-          curl -s https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml | grep -o "<version>[^<]*+$MC</version>" | tail -3
-          echo "--- Loom:"
-          curl -s https://maven.fabricmc.net/net/fabricmc/fabric-loom/net.fabricmc.fabric-loom.gradle.plugin/maven-metadata.xml | grep -o '<version>[^<]*</version>' | tail -5
+          {
+            echo "Minecraft (gradle.properties): $MC"
+            echo "Neueste MC-Versionen:"; curl -s https://meta.fabricmc.net/v2/versions/game | jq -r '.[0:8][] | "\(.version) stable=\(.stable)"'
+            echo "Loader:"; curl -s https://meta.fabricmc.net/v2/versions/loader | jq -r '.[0:3][].version'
+            echo "Fabric API:"; curl -s https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml | grep -o '<version>[^<]*</version>' | tail -6
+            echo "Loom:"; curl -s https://maven.fabricmc.net/net/fabricmc/fabric-loom/net.fabricmc.fabric-loom.gradle.plugin/maven-metadata.xml | grep -o '<version>[^<]*</version>' | tail -6
+          } > versions.txt
+          echo "::notice title=Versionen::$(sed ':a;N;$!ba;s/\n/%0A/g' versions.txt)"
 
       - name: Build
-        run: chmod +x gradlew && ./gradlew build --stacktrace
+        run: |
+          chmod +x gradlew
+          set -o pipefail
+          ./gradlew build 2>&1 | tee build.log || {
+            echo "::error title=Build::$(grep -E 'error:|What went wrong|Could not|> ' build.log | head -60 | sed ':a;N;$!ba;s/\n/%0A/g')"
+            exit 1
+          }
 
       - uses: actions/upload-artifact@v4
         with:

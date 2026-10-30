@@ -18,49 +18,8 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v5
 
-      - name: Versionen anzeigen
-        run: |
-          MC=$(grep '^minecraft_version=' gradle.properties | cut -d= -f2)
-          {
-            echo "Minecraft (gradle.properties): $MC"
-            echo "Neueste MC-Versionen:"; curl -s https://meta.fabricmc.net/v2/versions/game | jq -r '.[0:8][] | "\(.version) stable=\(.stable)"'
-            echo "Loader:"; curl -s https://meta.fabricmc.net/v2/versions/loader | jq -r '.[0:3][].version'
-            echo "Fabric API:"; curl -s https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml | grep -o '<version>[^<]*</version>' | tail -6
-            echo "Loom:"; curl -s https://maven.fabricmc.net/net/fabricmc/fabric-loom/net.fabricmc.fabric-loom.gradle.plugin/maven-metadata.xml | grep -o '<version>[^<]*</version>' | tail -6
-          } > versions.txt
-          echo "::notice title=Versionen::$(sed ':a;N;$!ba;s/\n/%0A/g' versions.txt)"
-
       - name: Build
-        run: |
-          chmod +x gradlew
-          set -o pipefail
-          ./gradlew build 2>&1 | tee build.log || {
-            echo "::notice title=Build::$(grep -E -A1 'error:|What went wrong|Could not' build.log | head -120 | sed ':a;N;$!ba;s/\n/%0A/g')"
-            exit 1
-          }
-
-      - name: Diagnose
-        if: failure()
-        run: |
-          MCJAR=$(find ~/.gradle/caches .gradle -name 'minecraft-*client*.jar' -o -name 'minecraft-merged*.jar' 2>/dev/null | grep -v sources | head -1)
-          [ -z "$MCJAR" ] && MCJAR=$(find ~/.gradle/caches .gradle -name '*.jar' -path '*minecraft*' 2>/dev/null | grep -v sources | xargs ls -S | head -1)
-          FAPI=$(find ~/.gradle/caches -name 'fabric-rendering-v1*.jar' | grep -v sources | head -1)
-          FSCR=$(find ~/.gradle/caches -name 'fabric-screen-api-v1*.jar' | grep -v sources | head -1)
-          {
-            echo "MCJAR=$MCJAR"
-            unzip -l "$MCJAR" | grep -oE 'net/minecraft/client/gui/[A-Za-z]+\.class' | sort -u | tr '\n' ' '
-            echo
-            javap -cp "$FAPI" net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement
-          } > diag1.txt
-          echo "::notice title=Diag1::$(sed ':a;N;$!ba;s/\n/%0A/g' diag1.txt)"
-          G=$(unzip -l "$MCJAR" | grep -oE 'net/minecraft/client/gui/Gui[A-Za-z]*\.class' | grep -v '^net/minecraft/client/gui/Gui.class' | head -3 | sed 's/\.class//; s#/#.#g')
-          for c in NONE; do javap -cp "$MCJAR" $c | grep -E 'public|class' | head -70 > d.txt; echo "::notice title=$c::$(sed ':a;N;$!ba;s/\n/%0A/g' d.txt)"; done
-          {
-            javap -cp "$MCJAR" net.minecraft.client.Minecraft | grep -iE 'screen|gui|class'
-            javap -cp "$MCJAR" net.minecraft.client.gui.components.EditBox | grep -iE 'filter|Predicate|setValue|Hint|MaxLength|EditBox\('
-            javap -cp "$MCJAR" net.minecraft.client.gui.screens.ConfirmScreen | grep -E 'ConfirmScreen\('
-          } > d.txt; echo "::notice title=Diag2::$(sed ':a;N;$!ba;s/\n/%0A/g' d.txt)"
-          javap -cp "$FSCR" net.fabricmc.fabric.api.client.screen.v1.Screens > d.txt; echo "::notice title=Screens::$(sed ':a;N;$!ba;s/\n/%0A/g' d.txt)"
+        run: chmod +x gradlew && ./gradlew build
 
       - uses: actions/upload-artifact@v4
         with:

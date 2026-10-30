@@ -125,7 +125,6 @@ public class WaypointEditScreen extends Screen {
     private EditBox coordBox(int x, String value, String label) {
         EditBox box = new EditBox(font, x + 12, top + 58, 52, 18, Component.literal(label));
         box.setMaxLength(9);
-        box.setFilter(s -> s.matches("-?\\d{0,8}"));
         box.setValue(value);
         return addRenderableWidget(box);
     }
@@ -166,7 +165,7 @@ public class WaypointEditScreen extends Screen {
 
     @Override
     public void onClose() {
-        Minecraft.getInstance().setScreen(parent);
+        Minecraft.getInstance().gui.setScreen(parent);
     }
 
     @Override

@@ -49,7 +49,7 @@ public class WaypointListScreen extends Screen {
             int bx = rowLeft + 400;
             addRenderableWidget(Button.builder(Component.literal("Löschen"), b -> confirmDelete(wp))
                     .bounds(bx - 50, y + 1, 50, 20).build());
-            addRenderableWidget(Button.builder(Component.literal("Bearbeiten"), b -> Minecraft.getInstance().setScreen(new WaypointEditScreen(this, wp)))
+            addRenderableWidget(Button.builder(Component.literal("Bearbeiten"), b -> Minecraft.getInstance().gui.setScreen(new WaypointEditScreen(this, wp)))
                     .bounds(bx - 116, y + 1, 64, 20).build());
             addRenderableWidget(Button.builder(Component.literal(wp.visible ? "An" : "Aus"), b -> {
                         wp.visible = !wp.visible;
@@ -71,16 +71,16 @@ public class WaypointListScreen extends Screen {
         }).bounds(width / 2 - 146, bottom, 20, 20).build());
         next.active = page < pageCount() - 1;
 
-        addRenderableWidget(Button.builder(Component.literal("Neuer Wegpunkt"), b -> Minecraft.getInstance().setScreen(new WaypointEditScreen(this, null)))
+        addRenderableWidget(Button.builder(Component.literal("Neuer Wegpunkt"), b -> Minecraft.getInstance().gui.setScreen(new WaypointEditScreen(this, null)))
                 .bounds(width / 2 - 100, bottom, 130, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Fertig"), b -> onClose())
                 .bounds(width / 2 + 40, bottom, 130, 20).build());
     }
 
     private void confirmDelete(Waypoint wp) {
-        Minecraft.getInstance().setScreen(new ConfirmScreen(confirmed -> {
+        Minecraft.getInstance().gui.setScreen(new ConfirmScreen(confirmed -> {
             if (confirmed) WaypointStore.remove(wp);
-            Minecraft.getInstance().setScreen(this);
+            Minecraft.getInstance().gui.setScreen(this);
         }, Component.literal("Wegpunkt löschen?"), Component.literal("\"" + displayName(wp) + "\" wird endgültig gelöscht.")));
     }
 
@@ -90,7 +90,7 @@ public class WaypointListScreen extends Screen {
 
     @Override
     public void onClose() {
-        Minecraft.getInstance().setScreen(parent);
+        Minecraft.getInstance().gui.setScreen(parent);
     }
 
     @Override

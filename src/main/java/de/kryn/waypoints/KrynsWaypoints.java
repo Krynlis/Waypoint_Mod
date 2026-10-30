@@ -40,13 +40,13 @@ public class KrynsWaypoints implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             while (createKey.consumeClick()) {
-                if (mc.player != null && mc.screen == null) {
-                    mc.setScreen(new WaypointEditScreen(null, null));
+                if (mc.player != null) {
+                    mc.gui.setScreen(new WaypointEditScreen(null, null));
                 }
             }
             while (listKey.consumeClick()) {
-                if (mc.player != null && mc.screen == null) {
-                    mc.setScreen(new WaypointListScreen(null));
+                if (mc.player != null) {
+                    mc.gui.setScreen(new WaypointListScreen(null));
                 }
             }
         });
@@ -55,7 +55,7 @@ public class KrynsWaypoints implements ClientModInitializer {
         ScreenEvents.AFTER_INIT.register((mc, screen, width, height) -> {
             if (screen instanceof PauseScreen) {
                 Screens.getWidgets(screen).add(Button.builder(Component.literal("Waypointliste"),
-                                b -> mc.setScreen(new WaypointListScreen(screen)))
+                                b -> mc.gui.setScreen(new WaypointListScreen(screen)))
                         .bounds(width - 105, 5, 100, 20)
                         .build());
             }

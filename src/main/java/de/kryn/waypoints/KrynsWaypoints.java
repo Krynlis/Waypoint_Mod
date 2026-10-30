@@ -27,7 +27,6 @@ public class KrynsWaypoints implements ClientModInitializer {
             KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "main"));
 
     private static KeyMapping createKey;
-    private static KeyMapping listKey;
 
     @Override
     public void onInitializeClient() {
@@ -35,18 +34,11 @@ public class KrynsWaypoints implements ClientModInitializer {
 
         createKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.kryns_waypoints.create", InputConstants.KEY_B, CATEGORY));
-        listKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.kryns_waypoints.list", -1, CATEGORY));
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             while (createKey.consumeClick()) {
                 if (mc.player != null) {
                     mc.gui.setScreen(new WaypointEditScreen(null, null));
-                }
-            }
-            while (listKey.consumeClick()) {
-                if (mc.player != null) {
-                    mc.gui.setScreen(new WaypointListScreen(null));
                 }
             }
         });

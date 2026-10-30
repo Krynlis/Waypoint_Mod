@@ -19,8 +19,8 @@ public class SettingsScreen extends KScreen {
         Settings settings = Settings.get();
         int w = 240;
         int x = width / 2 - w / 2;
-        int y = height / 2 - 65;
-        setPanel(x - 12, y, w + 24, 130);
+        int y = height / 2 - 75;
+        setPanel(x - 12, y, w + 24, 150);
 
         addRenderableWidget(new KSlider(x, y + 30, w, 20, DISTANCE_STEPS,
                 (settings.switchDistance - Settings.MIN_DISTANCE) / Settings.DISTANCE_STEP,
@@ -31,7 +31,9 @@ public class SettingsScreen extends KScreen {
                 step -> settings.markerSize = step));
         addRenderableWidget(new KCheckbox(x, y + 84, w, "Marker 50% transparent", settings.transparent,
                 value -> settings.transparent = value));
-        addRenderableWidget(new KButton(width / 2 - 60, y + 104, 120, 20, "Fertig", this::onClose));
+        addRenderableWidget(new KCheckbox(x, y + 102, w, "Todespunkt automatisch speichern", settings.deathWaypoints,
+                value -> settings.deathWaypoints = value));
+        addRenderableWidget(new KButton(width / 2 - 60, y + 124, 120, 20, "Fertig", this::onClose));
     }
 
     private static int distance(int step) {

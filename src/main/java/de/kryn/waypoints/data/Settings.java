@@ -27,6 +27,8 @@ public final class Settings {
     public int markerSize = 2;
     /** Marker mit 50% Transparenz zeichnen. */
     public boolean transparent = false;
+    /** Beim Tod automatisch einen Wegpunkt am Todespunkt anlegen. */
+    public boolean deathWaypoints = true;
 
     public static Settings get() {
         return instance;

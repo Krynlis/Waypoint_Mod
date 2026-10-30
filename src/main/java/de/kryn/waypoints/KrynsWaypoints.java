@@ -17,6 +17,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
@@ -42,6 +43,7 @@ public class KrynsWaypoints implements ClientModInitializer {
                 "key.kryns_waypoints.create", InputConstants.KEY_B, CATEGORY));
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
+            DeathWaypoints.tick(mc);
             while (createKey.consumeClick()) {
                 if (mc.player != null) {
                     mc.gui.setScreen(new WaypointEditScreen(null, null));
@@ -51,6 +53,9 @@ public class KrynsWaypoints implements ClientModInitializer {
 
         // Buttons "Optionen" und "Waypointliste" oben rechts im Escape-Menü
         ScreenEvents.AFTER_INIT.register((mc, screen, width, height) -> {
+            if (screen instanceof DeathScreen) {
+                DeathWaypoints.onDeathScreen(mc);
+            }
             if (screen instanceof PauseScreen) {
                 Screens.getWidgets(screen).add(new KButton(width - 105, 5, 100, 20, "Waypointliste",
                         () -> mc.gui.setScreen(new WaypointListScreen(screen))));

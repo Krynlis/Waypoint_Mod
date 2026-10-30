@@ -6,6 +6,7 @@ Rein clientseitige Fabric-Mod für Wegpunkte (Minecraft 26.3+).
 - **Escape-Menü → „Optionen“**: Wechselentfernung zur XP-Leiste (50–2000), Markergröße, 50% Transparenz
 - **Escape-Menü → „Waypointliste“** (oben rechts): Wegpunkte bearbeiten, ein-/ausblenden, löschen
 - Bis zur eingestellten Entfernung (Standard 300): Symbol + Name + Entfernung in der Welt (durch Wände sichtbar), weiter weg: Symbol auf der XP-Leiste in Blickrichtung
+- Beim Tod wird automatisch ein Wegpunkt am Todespunkt angelegt (abschaltbar in den Optionen)
 - Gespeichert pro Welt/Server und Dimension in `config/kryns_waypoints.json`
 
 ## Bauen

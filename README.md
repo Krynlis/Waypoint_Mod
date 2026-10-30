@@ -1,0 +1,16 @@
+# Kryn´s Waypoints
+
+Rein clientseitige Fabric-Mod für Wegpunkte (Minecraft 26.3+).
+
+- **B** (änderbar unter Steuerung): Wegpunkt an der aktuellen Position erstellen – Name, Koordinaten, 16 Symbole und 8x8-Farbwahl
+- **Escape-Menü → „Waypointliste“** (oben rechts): Wegpunkte bearbeiten, ein-/ausblenden, löschen
+- Bis 300 Blöcke: Symbol + Name + Entfernung in der Welt (durch Wände sichtbar), weiter weg: Symbol auf der XP-Leiste in Blickrichtung
+- Gespeichert pro Welt/Server und Dimension in `config/kryns_waypoints.json`
+
+## Bauen
+
+```
+./gradlew build
+```
+
+Die fertige Jar liegt in `build/libs/`. Alternativ baut GitHub Actions bei jedem Push und stellt die Jar als Artefakt bereit.

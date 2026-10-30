@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "kryns_waypoints",
+  "version": "${version}",
+  "name": "Kryn´s Waypoints",
+  "description": "Einfache, rein clientseitige Wegpunkte mit Symbolen, Farben und Wegpunktliste.",
+  "authors": ["Kryn"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["de.kryn.waypoints.KrynsWaypoints"]
+  },
+  "depends": {
+    "fabricloader": "*",
+    "minecraft": ">=${minecraft_version}",
+    "fabric-api": "*",
+    "java": ">=25"
+  }
+}

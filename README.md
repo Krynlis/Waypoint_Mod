@@ -14,3 +14,7 @@ Rein clientseitige Fabric-Mod für Wegpunkte (Minecraft 26.3+).
 ```
 
 Die fertige Jar liegt in `build/libs/`. Alternativ baut GitHub Actions bei jedem Push und stellt die Jar als Artefakt bereit.
+
+## Release
+
+Jeder Push auf `main` baut die Mod und legt die Jar im Release `v<mod_version>` ab (Version in `gradle.properties`). Für ein neues Release `mod_version` erhöhen.

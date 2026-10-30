@@ -1,6 +1,6 @@
 package de.kryn.waypoints.data;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.Map;
 
@@ -199,7 +199,7 @@ public enum WaypointIcon {
     }
 
     /** Zeichnet das Symbol mit linker oberer Ecke (x, y); jeder Pixel ist scale x scale groß. */
-    public void draw(GuiGraphics g, int x, int y, int scale, int waypointColor) {
+    public void draw(GuiGraphicsExtractor g, int x, int y, int scale, int waypointColor) {
         for (int row = 0; row < 8; row++) {
             String line = rows[row];
             for (int col = 0; col < 8; col++) {

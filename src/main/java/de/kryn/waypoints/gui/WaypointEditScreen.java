@@ -3,7 +3,7 @@ package de.kryn.waypoints.gui;
 import de.kryn.waypoints.data.Waypoint;
 import de.kryn.waypoints.data.WaypointIcon;
 import de.kryn.waypoints.data.WaypointStore;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
@@ -169,13 +169,13 @@ public class WaypointEditScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float delta) {
-        super.render(g, mouseX, mouseY, delta);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(g, mouseX, mouseY, delta);
         int cx = width / 2;
         int argb = 0xFF000000 | color;
 
-        g.drawCenteredString(font, title, cx, top + 6, 0xFFFFFFFF);
-        g.drawString(font, "Name", cx - 100, top + 16, 0xFFA0A0A0, false);
+        g.centeredText(font, title, cx, top + 6, 0xFFFFFFFF);
+        g.text(font, "Name", cx - 100, top + 16, 0xFFA0A0A0, false);
 
         // Vorschau neben dem Namen
         int px = cx + 108, py = top + 23;
@@ -183,13 +183,13 @@ public class WaypointEditScreen extends Screen {
         g.fill(px - 1, py - 1, px + 25, py + 25, 0xFF101010);
         icon.draw(g, px + 4, py + 4, 2, argb);
 
-        g.drawString(font, "Koordinaten", cx - 150, top + 48, 0xFFA0A0A0, false);
-        g.drawString(font, "X", cx - 147, top + 63, 0xFFFFFFFF, false);
-        g.drawString(font, "Y", cx - 79, top + 63, 0xFFFFFFFF, false);
-        g.drawString(font, "Z", cx - 11, top + 63, 0xFFFFFFFF, false);
+        g.text(font, "Koordinaten", cx - 150, top + 48, 0xFFA0A0A0, false);
+        g.text(font, "X", cx - 147, top + 63, 0xFFFFFFFF, false);
+        g.text(font, "Y", cx - 79, top + 63, 0xFFFFFFFF, false);
+        g.text(font, "Z", cx - 11, top + 63, 0xFFFFFFFF, false);
 
-        g.drawString(font, "Symbol", cx - 150, top + 86, 0xFFA0A0A0, false);
-        g.drawString(font, "Farbe", cx + 150 - ColorPalette.SIZE * COLOR_CELL, top + 86, 0xFFA0A0A0, false);
+        g.text(font, "Symbol", cx - 150, top + 86, 0xFFA0A0A0, false);
+        g.text(font, "Farbe", cx + 150 - ColorPalette.SIZE * COLOR_CELL, top + 86, 0xFFA0A0A0, false);
 
         WaypointIcon[] icons = WaypointIcon.values();
         for (int i = 0; i < iconButtons.size(); i++) {
@@ -209,7 +209,7 @@ public class WaypointEditScreen extends Screen {
         }
     }
 
-    static void outline(GuiGraphics g, int x, int y, int w, int h, int argb) {
+    static void outline(GuiGraphicsExtractor g, int x, int y, int w, int h, int argb) {
         g.fill(x, y, x + w, y + 1, argb);
         g.fill(x, y + h - 1, x + w, y + h, argb);
         g.fill(x, y, x + 1, y + h, argb);

@@ -2,7 +2,7 @@ package de.kryn.waypoints.gui;
 
 import de.kryn.waypoints.data.Waypoint;
 import de.kryn.waypoints.data.WaypointStore;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -93,13 +93,13 @@ public class WaypointListScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float delta) {
-        super.render(g, mouseX, mouseY, delta);
-        g.drawCenteredString(font, title, width / 2, 12, 0xFFFFFFFF);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(g, mouseX, mouseY, delta);
+        g.centeredText(font, title, width / 2, 12, 0xFFFFFFFF);
 
         List<Waypoint> list = waypoints();
         if (list.isEmpty()) {
-            g.drawCenteredString(font, "Noch keine Wegpunkte. Erstelle einen mit \"B\".", width / 2, LIST_TOP + 20, 0xFFA0A0A0);
+            g.centeredText(font, "Noch keine Wegpunkte. Erstelle einen mit \"B\".", width / 2, LIST_TOP + 20, 0xFFA0A0A0);
             return;
         }
 
@@ -116,7 +116,7 @@ public class WaypointListScreen extends Screen {
             g.fill(rowLeft + 3, y + 3, rowLeft + 19, y + 19, 0xFF101010);
             wp.getIcon().draw(g, rowLeft + 3, y + 3, 2, argb);
 
-            g.drawString(font, displayName(wp), rowLeft + 26, y + 3, wp.visible ? argb : 0xFF707070, true);
+            g.text(font, displayName(wp), rowLeft + 26, y + 3, wp.visible ? argb : 0xFF707070, true);
 
             String info = wp.x + " / " + wp.y + " / " + wp.z + "  " + WaypointStore.dimensionLabel(wp.dimension);
             if (player != null && wp.dimension.equals(currentDim)) {
@@ -125,9 +125,9 @@ public class WaypointListScreen extends Screen {
                 double dz = wp.z + 0.5 - player.getZ();
                 info += "  " + (int) Math.sqrt(dx * dx + dy * dy + dz * dz) + "m";
             }
-            g.drawString(font, info, rowLeft + 26, y + 13, 0xFFA0A0A0, false);
+            g.text(font, info, rowLeft + 26, y + 13, 0xFFA0A0A0, false);
         }
 
-        g.drawString(font, (page + 1) + "/" + pageCount(), width / 2 - 122, height - 22, 0xFFFFFFFF, false);
+        g.text(font, (page + 1) + "/" + pageCount(), width / 2 - 122, height - 22, 0xFFFFFFFF, false);
     }
 }

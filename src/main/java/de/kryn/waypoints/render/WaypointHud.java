@@ -5,7 +5,7 @@ import de.kryn.waypoints.data.WaypointStore;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
 
@@ -20,7 +20,7 @@ public final class WaypointHud {
 
     private WaypointHud() {}
 
-    public static void render(GuiGraphics g, DeltaTracker deltaTracker) {
+    public static void render(GuiGraphicsExtractor g, DeltaTracker deltaTracker) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null || mc.level == null || mc.options.hideGui) return;
@@ -49,7 +49,7 @@ public final class WaypointHud {
         }
     }
 
-    private static void renderInWorld(GuiGraphics g, Font font, Waypoint wp, double dx, double dy, double dz,
+    private static void renderInWorld(GuiGraphicsExtractor g, Font font, Waypoint wp, double dx, double dy, double dz,
                                       double distance, float yaw, float pitch, double fov, int width, int height) {
         double yawRad = Math.toRadians(yaw);
         double pitchRad = Math.toRadians(pitch);
@@ -83,13 +83,13 @@ public final class WaypointHud {
         int nameWidth = font.width(name);
         int nameY = top - 14;
         g.fill(sx - nameWidth / 2 - 2, nameY - 2, sx + nameWidth / 2 + 2, nameY + 9, 0x80000000);
-        g.drawCenteredString(font, name, sx, nameY, wp.argb());
+        g.centeredText(font, name, sx, nameY, wp.argb());
 
         String dist = (int) distance + "m";
-        g.drawCenteredString(font, dist, sx, top + iconSize + 4, 0xFFE0E0E0);
+        g.centeredText(font, dist, sx, top + iconSize + 4, 0xFFE0E0E0);
     }
 
-    private static void renderOnXpBar(GuiGraphics g, Waypoint wp, double dx, double dz, float yaw, int width, int height) {
+    private static void renderOnXpBar(GuiGraphicsExtractor g, Waypoint wp, double dx, double dz, float yaw, int width, int height) {
         double targetYaw = Math.toDegrees(Math.atan2(-dx, dz));
         double relative = wrapDegrees(targetYaw - yaw);
         double clamped = Math.max(-90.0, Math.min(90.0, relative));

@@ -55,7 +55,7 @@ public class KrynsWaypoints implements ClientModInitializer {
         // Button "Waypointliste" oben rechts im Escape-Menü
         ScreenEvents.AFTER_INIT.register((mc, screen, width, height) -> {
             if (screen instanceof PauseScreen) {
-                Screens.getButtons(screen).add(Button.builder(Component.literal("Waypointliste"),
+                Screens.getWidgets(screen).add(Button.builder(Component.literal("Waypointliste"),
                                 b -> mc.setScreen(new WaypointListScreen(screen)))
                         .bounds(width - 105, 5, 100, 20)
                         .build());

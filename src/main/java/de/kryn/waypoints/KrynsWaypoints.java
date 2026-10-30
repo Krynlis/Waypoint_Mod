@@ -34,9 +34,9 @@ public class KrynsWaypoints implements ClientModInitializer {
         WaypointStore.load();
 
         createKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.kryns_waypoints.create", InputConstants.Type.KEYSYM, InputConstants.KEY_B, CATEGORY));
+                "key.kryns_waypoints.create", InputConstants.KEY_B, CATEGORY));
         listKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.kryns_waypoints.list", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), CATEGORY));
+                "key.kryns_waypoints.list", -1, CATEGORY));
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             while (createKey.consumeClick()) {

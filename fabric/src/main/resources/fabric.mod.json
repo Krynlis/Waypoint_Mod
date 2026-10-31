@@ -8,7 +8,7 @@
   "license": "MIT",
   "environment": "client",
   "entrypoints": {
-    "client": ["de.kryn.waypoints.KrynsWaypoints"]
+    "client": ["de.kryn.waypoints.fabric.KrynsWaypointsFabric"]
   },
   "depends": {
     "fabricloader": "*",

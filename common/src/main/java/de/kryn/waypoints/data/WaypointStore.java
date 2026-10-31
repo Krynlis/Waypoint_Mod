@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import de.kryn.waypoints.KrynsWaypoints;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 
@@ -29,7 +28,7 @@ public final class WaypointStore {
     private WaypointStore() {}
 
     private static Path file() {
-        return FabricLoader.getInstance().getConfigDir().resolve("kryns_waypoints.json");
+        return KrynsWaypoints.configDir().resolve("kryns_waypoints.json");
     }
 
     public static void load() {

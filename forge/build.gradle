@@ -1,0 +1,14 @@
+plugins {
+    id 'net.minecraftforge.gradle' version "${forgegradle_version}"
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+}
+
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${rootProject.forge_version}")
+}

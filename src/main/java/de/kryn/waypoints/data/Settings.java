@@ -3,6 +3,7 @@ package de.kryn.waypoints.data;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.kryn.waypoints.KrynsWaypoints;
+import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.Reader;
 import java.io.Writer;
@@ -42,7 +43,7 @@ public final class Settings {
     }
 
     private static Path file() {
-        return KrynsWaypoints.configDir().resolve("kryns_waypoints_options.json");
+        return FabricLoader.getInstance().getConfigDir().resolve("kryns_waypoints_options.json");
     }
 
     public static void load() {

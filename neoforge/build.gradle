@@ -1,7 +1,0 @@
-plugins {
-    id 'net.neoforged.moddev' version "${moddev_version}"
-}
-
-neoForge {
-    version = rootProject.neoforge_version
-}

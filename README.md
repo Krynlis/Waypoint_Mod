@@ -1,6 +1,6 @@
 # Kryn´s Waypoints
 
-Rein clientseitige Mod für Wegpunkte (Minecraft 26.3+) – für Fabric (mit Fabric API), NeoForge und Forge.
+Rein clientseitige Fabric-Mod für Wegpunkte (Minecraft 26.3+).
 
 - **B** (änderbar unter Steuerung): Wegpunkt an der aktuellen Position erstellen – Name, Koordinaten, 65 Symbole und 8x8-Farbwahl
 - **Escape-Menü → „Optionen“**: Wechselentfernung zur XP-Leiste (50–2000), Markergröße, 50% Transparenz
@@ -15,7 +15,7 @@ Rein clientseitige Mod für Wegpunkte (Minecraft 26.3+) – für Fabric (mit Fab
 ./gradlew build
 ```
 
-Die fertigen Jars liegen in `fabric/build/libs/`, `neoforge/build/libs/` und `forge/build/libs/`. Der gemeinsame Code liegt in `common/`, die Loader-Ordner enthalten nur den jeweiligen Einstiegspunkt. Alternativ baut GitHub Actions bei jedem Push und stellt die Jar als Artefakt bereit.
+Die fertige Jar liegt in `build/libs/`. Alternativ baut GitHub Actions bei jedem Push und stellt die Jar als Artefakt bereit.
 
 ## Release
 

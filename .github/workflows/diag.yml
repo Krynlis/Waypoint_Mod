@@ -1,0 +1,27 @@
+name: Diag
+on:
+  push:
+    branches: [diag]
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v5
+      - run: chmod +x gradlew && ./gradlew compileJava -q || true
+      - run: |
+          J=$(find ~/.gradle/caches/fabric-loom -name 'minecraft-client.jar' | head -1)
+          CP="$J:$(find ~/.gradle/caches -name 'authlib-*.jar' | grep -v sources | head -1)"
+          n() { echo "::notice title=$1::$(sed ':a;N;$!ba;s/\n/%0A/g' d.txt | cut -c1-60000)"; }
+          javap -p -cp "$CP" net.minecraft.client.gui.components.PlayerTabOverlay | grep -iE 'name|extract|render|Component' > d.txt; n Tab
+          javap -cp "$CP" net.minecraft.client.Minecraft | grep -iE 'service|session|getUser|user\(' > d.txt; n Mc
+          javap -cp "$CP" net.minecraft.client.User | grep -E 'public' > d.txt; n User
+          javap -cp "$CP" com.mojang.authlib.minecraft.MinecraftSessionService | grep -E 'joinServer|class' > d.txt; n Session
+          javap -cp "$CP" net.minecraft.client.multiplayer.PlayerInfo | grep -E 'public' > d.txt; n PlayerInfo
+          javap -cp "$CP" 'net.minecraft.network.chat.ClickEvent$RunCommand' 'net.minecraft.network.chat.HoverEvent$ShowText' | grep -E 'public|class' > d.txt; n Click
+          javap -cp "$CP" net.minecraft.network.chat.Style | grep -E 'with(Click|Hover|Color)' > d.txt; n Style
+          for c in Services; do javap -cp "$CP" net.minecraft.server.$c 2>/dev/null; done | grep -iE 'session|class' > d.txt; n Services

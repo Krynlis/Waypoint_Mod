@@ -29,6 +29,10 @@ public final class Settings {
     public boolean transparent = false;
     /** Beim Tod automatisch einen Wegpunkt am Todespunkt anlegen. */
     public boolean deathWaypoints = true;
+    /** Wegpunkte über den Vermittlungsdienst teilen. */
+    public boolean sharing = true;
+    /** Adresse des Vermittlungsdienstes, z.B. "123.45.67.89:25570". */
+    public String relayUrl = "";
 
     public static Settings get() {
         return instance;

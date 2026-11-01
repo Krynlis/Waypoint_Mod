@@ -2,6 +2,7 @@ package de.kryn.waypoints.gui;
 
 import de.kryn.waypoints.data.Waypoint;
 import de.kryn.waypoints.data.WaypointStore;
+import de.kryn.waypoints.share.RelayClient;
 import de.kryn.waypoints.ui.KButton;
 import de.kryn.waypoints.ui.KConfirmScreen;
 import de.kryn.waypoints.ui.KScreen;
@@ -54,7 +55,10 @@ public class WaypointListScreen extends KScreen {
             addRenderableWidget(new KButton(bx - 50, y + 3, 50, 16, "Löschen", () -> confirmDelete(wp)).danger());
             addRenderableWidget(new KButton(bx - 116, y + 3, 64, 16, "Bearbeiten",
                     () -> Minecraft.getInstance().gui.setScreen(new WaypointEditScreen(this, wp))));
-            addRenderableWidget(new KButton(bx - 148, y + 3, 30, 16, wp.visible ? "An" : "Aus", () -> {
+            KButton share = addRenderableWidget(new KButton(bx - 164, y + 3, 46, 16, "Teilen",
+                    () -> Minecraft.getInstance().gui.setScreen(new ShareScreen(this, wp))));
+            share.active = RelayClient.isConnected();
+            addRenderableWidget(new KButton(bx - 196, y + 3, 30, 16, wp.visible ? "An" : "Aus", () -> {
                 wp.visible = !wp.visible;
                 WaypointStore.save();
                 rebuildWidgets();

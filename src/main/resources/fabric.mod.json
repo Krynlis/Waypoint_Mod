@@ -7,6 +7,7 @@
   "authors": ["Kryn"],
   "license": "MIT",
   "environment": "client",
+  "mixins": ["kryns_waypoints.mixins.json"],
   "entrypoints": {
     "client": ["de.kryn.waypoints.KrynsWaypoints"]
   },

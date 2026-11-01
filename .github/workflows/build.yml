@@ -33,7 +33,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: kryns-waypoints
-          path: build/libs/*.jar
+          path: |
+            build/libs/*.jar
+            relay/build/libs/*.jar
 
       - name: Version lesen
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -56,5 +58,8 @@ jobs:
           target_commitish: ${{ github.sha }}
           body: |
             Kryn´s Waypoints ${{ steps.version.outputs.version }} für Minecraft 26.3+ (Fabric).
-            Benötigt: Fabric Loader und Fabric API. Die .jar in den `mods`-Ordner legen.
-          files: build/libs/kryns-waypoints-${{ steps.version.outputs.version }}.jar
+            Mod: `kryns-waypoints-…jar` mit Fabric API in den `mods`-Ordner legen.
+            Vermittlungsdienst zum Teilen: `kryns-waypoints-relay-…jar` (siehe README).
+          files: |
+            build/libs/kryns-waypoints-${{ steps.version.outputs.version }}.jar
+            relay/build/libs/kryns-waypoints-relay-${{ steps.version.outputs.version }}.jar
